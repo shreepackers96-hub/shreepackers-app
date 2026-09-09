@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shree Packers - Attendance Portal</title>
+    <!-- Mobile App (PWA) Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Shree Packers">
+    <meta name="theme-color" content="#1e1b4b">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-indigo-700 text-white shadow-md py-4 px-6 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-box-open text-2xl"></i>
+            <h1 class="text-xl font-bold tracking-wide">SHREE PACKERS</h1>
+        </div>
+        <div id="userInfo" class="hidden flex items-center space-x-4">
+            <span id="userRoleBadge" class="bg-indigo-600 text-xs px-2.5 py-1 rounded-full font-semibold border border-indigo-400">Manager</span>
+            <button id="logoutBtn" class="text-white hover:text-indigo-200 focus:outline-none transition-colors">
+                <i class="fas fa-sign-out-alt text-lg"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow p-4 md:p-6 max-w-4xl mx-auto w-full">
+
+        <!-- 1. LOGIN SCREEN -->
+        <section id="loginSection" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 max-w-md mx-auto my-12">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-indigo-100 text-indigo-700 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-user-shield text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold">Shree Packers Login</h2>
+                <p class="text-slate-500 text-sm mt-1">Please enter your credentials to proceed</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-4" autocomplete="off" onsubmit="handleLogin(event); return false;">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <input type="text" id="username" required autocomplete="off" data-lpignore="true"
+                            class="pl-10 w-full rounded-xl border border-slate-200 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                            placeholder="Enter username">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password" id="password" required autocomplete="new-password" data-lpignore="true"
+                            class="pl-10 w-full rounded-xl border border-slate-200 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                            placeholder="Enter password">
+                    </div>
+                </div>
+                <button type="submit" 
+                    class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-indigo-100 hover:shadow-none flex items-center justify-center space-x-2">
+                    <span>Login</span>
+                    <i class="fas fa-arrow-right text-sm"></i>
+                </button>
+                <div id="loginError" class="hidden text-red-500 text-sm text-center mt-2 font-medium"></div>
+
+                <!-- 1-Click Quick Login Buttons to bypass browser autofill -->
+                <div class="pt-4 border-t border-slate-100">
+                    <p class="text-xs text-slate-400 text-center mb-2 font-medium">Quick 1-Click Login:</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="quickLogin('manager')" 
+                            class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center space-x-1.5 transition-all border border-indigo-200 shadow-sm">
+                            <i class="fas fa-user-clock text-sm"></i>
+                            <span>Login: Manager</span>
+                        </button>
+                        <button type="button" onclick="quickLogin('admin')" 
+                            class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center space-x-1.5 transition-all border border-slate-300 shadow-sm">
+                            <i class="fas fa-shield-alt text-sm"></i>
+                            <span>Login: Admin</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- 2. MANAGER VIEW -->
+        <section id="managerSection" class="hidden space-y-6">
+            <!-- Summary Card with Interactive Date Picker -->
+            <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-6 rounded-2xl shadow-md flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <div>
+                    <p class="text-indigo-200 text-sm font-medium">Log Attendance For Date</p>
+                    <h3 id="currentDateDisplay" class="text-2xl font-bold mt-0.5">8 Sep 2026</h3>
+                </div>
+                <div class="flex items-center space-x-2 bg-white/15 p-2 rounded-xl backdrop-blur-sm border border-white/20">
+                    <label for="managerSelectedDate" class="text-xs font-semibold text-indigo-100 flex items-center space-x-1.5 cursor-pointer px-1">
+                        <i class="fas fa-calendar-alt text-base"></i>
+                        <span>Change Date:</span>
+                    </label>
+                    <input type="date" id="managerSelectedDate" 
+                        class="bg-white text-slate-800 font-bold text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 shadow-sm cursor-pointer">
+                </div>
+            </div>
+
+            <!-- Attendance Entry Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h4 class="text-lg font-bold">Labours Clock In/Out</h4>
+                        <p class="text-xs text-slate-500 mt-0.5">24-Hour System (HH:MM)</p>
+                    </div>
+                    <div class="flex bg-slate-100 p-1 rounded-xl">
+                        <button type="button" id="managerTab-Day" class="manager-shift-tab px-4 py-1.5 rounded-lg text-sm font-bold transition-all bg-white text-indigo-700 shadow-sm">
+                            Day Shift
+                        </button>
+                        <button type="button" id="managerTab-Night" class="manager-shift-tab px-4 py-1.5 rounded-lg text-sm font-bold transition-all text-slate-500 hover:text-slate-700">
+                            Night Shift
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-100">
+                        <thead>
+                            <tr class="text-left text-xs font-semibold text-slate-400 tracking-wider">
+                                <th class="pb-3 pr-4">Labour Name</th>
+                                <th class="pb-3 px-4 w-28">IN Time</th>
+                                <th class="pb-3 px-4 w-28">OUT Time</th>
+                                <th class="pb-3 pl-4 text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="managerLaborList" class="divide-y divide-slate-100">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button id="submitAttendanceBtn" 
+                        class="bg-indigo-700 hover:bg-indigo-800 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md shadow-indigo-100 hover:shadow-none flex items-center space-x-2">
+                        <i class="fas fa-save"></i>
+                        <span>Submit Attendance</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. ADMIN VIEW -->
+        <section id="adminSection" class="hidden space-y-6">
+            
+            <!-- ADMIN MAIN MENU (MODULE SELECTOR) -->
+            <div id="adminMainMenu" class="space-y-6">
+                <div class="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl">
+                    <h3 class="text-xl font-bold text-indigo-900">Welcome, Administrator</h3>
+                    <p class="text-slate-600 text-sm mt-1">Select an active module below to start managing operations.</p>
+                </div>
+                
+                <!-- Modules Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Module Card: Weekly Wages -->
+                    <button onclick="openAdminModule('weeklyWages')" 
+                        class="bg-white p-6 rounded-2xl border border-slate-200 hover:border-indigo-500 shadow-sm hover:shadow-md text-left transition-all flex items-start space-x-4 group w-full focus:outline-none">
+                        <div class="bg-indigo-100 text-indigo-700 p-4 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                            <i class="fas fa-coins text-2xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-bold text-slate-800 group-hover:text-indigo-700 transition-colors">Weekly Wages</h4>
+                            <p class="text-slate-500 text-sm mt-1">Record hours, manage laborer pay rates, approve check-in logs, and automate Friday Drive/Telegram exports.</p>
+                        </div>
+                    </button>
+                    
+                    <!-- Module Card: Future Placeholder -->
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 border-dashed text-left flex items-start space-x-4 opacity-60">
+                        <div class="bg-slate-200 text-slate-400 p-4 rounded-xl">
+                            <i class="fas fa-plus text-2xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-bold text-slate-400">Future Module</h4>
+                            <p class="text-slate-400 text-sm mt-1">Additional administrative modules (e.g., Billing, Inventory) will be added here in the future.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN WEEKLY WAGES MODULE -->
+            <div id="adminWeeklyWagesModule" class="hidden space-y-6">
+                <!-- Navigation & Back Button -->
+                <div class="flex items-center justify-between">
+                    <button onclick="closeAdminModule()" class="flex items-center text-indigo-700 hover:text-indigo-900 font-semibold text-sm transition-colors">
+                        <i class="fas fa-arrow-left mr-1.5"></i> Back to Main Menu
+                    </button>
+                    <h3 class="text-md font-bold text-slate-500">Weekly Wages Module</h3>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <div class="bg-white p-1 rounded-xl shadow-sm border border-slate-100 flex space-x-1">
+                    <button onclick="switchAdminTab('approve')" id="tabBtn-approve" class="admin-tab-btn flex-1 py-2.5 text-sm font-semibold rounded-lg bg-indigo-50 text-indigo-700 transition-all">
+                        <i class="fas fa-check-double mr-1.5"></i> Approve Sheets
+                    </button>
+                    <button onclick="switchAdminTab('laborers')" id="tabBtn-laborers" class="admin-tab-btn flex-1 py-2.5 text-sm font-semibold rounded-lg text-slate-500 hover:bg-slate-50 transition-all">
+                        <i class="fas fa-users mr-1.5"></i> Manage Labours
+                    </button>
+                    <button onclick="switchAdminTab('users')" id="tabBtn-users" class="admin-tab-btn flex-1 py-2.5 text-sm font-semibold rounded-lg text-slate-500 hover:bg-slate-50 transition-all">
+                        <i class="fas fa-user-cog mr-1.5"></i> Users & Passwords
+                    </button>
+                    <button onclick="switchAdminTab('settings')" id="tabBtn-settings" class="admin-tab-btn flex-1 py-2.5 text-sm font-semibold rounded-lg text-slate-500 hover:bg-slate-50 transition-all">
+                        <i class="fas fa-sliders-h mr-1.5"></i> Settings
+                    </button>
+                </div>
+
+            <!-- Tab 1: Approve Sheets -->
+            <div id="adminTab-approve" class="admin-tab-content space-y-6">
+                <!-- Pending Approvals Alert Banner -->
+                <div id="pendingAlertBanner" class="hidden bg-gradient-to-r from-amber-500 to-orange-600 text-white p-4 rounded-2xl shadow-md flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl font-bold flex-shrink-0">
+                            <i class="fas fa-clock text-amber-100"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm md:text-base">Pending Attendance Awaiting Your Approval</h4>
+                            <p id="pendingAlertText" class="text-xs text-amber-100">Submitted attendance logs are waiting for review & approval.</p>
+                        </div>
+                    </div>
+                    <div id="pendingDaysQuickPills" class="flex flex-wrap gap-2">
+                        <!-- Quick buttons for pending days populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Weekly Period Controls & Day-Wise Tabs -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                    <!-- Week Range Header & Navigation -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <button id="prevWeekBtn" type="button" title="Previous Week" class="p-2 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="text-left sm:text-center">
+                                <span class="text-[11px] uppercase tracking-wider text-slate-400 font-bold block">Payroll Cycle (Sun – Fri)</span>
+                                <h4 id="currentWeekRangeDisplay" class="text-sm md:text-base font-extrabold text-slate-800">
+                                    06 Sep 2026 – 11 Sep 2026
+                                </h4>
+                            </div>
+                            <button id="nextWeekBtn" type="button" title="Next Week" class="p-2 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                            <button id="currentWeekBtn" type="button" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition-colors ml-1">
+                                Current Week
+                            </button>
+                        </div>
+
+                        <!-- Secondary Custom Date Picker -->
+                        <div class="flex items-center space-x-2 text-xs text-slate-500">
+                            <label for="adminFilterDate" class="font-semibold text-slate-600">Pick Other Date:</label>
+                            <input type="date" id="adminFilterDate" class="rounded-lg border border-slate-200 px-2.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+
+                    <!-- Day-Wise Tabs Grid (Sun, Mon, Tue, Wed, Thu, Fri) -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2.5">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fas fa-calendar-week text-indigo-500"></i>
+                                <span>Day-Wise Approval Tabs:</span>
+                            </span>
+                            <span id="weeklyStatusSummary" class="text-xs font-bold text-slate-500">Checking pending logs...</span>
+                        </div>
+                        <div id="dayWiseTabsContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+                            <!-- Injected by JavaScript: 6 Day Tab Cards -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Sheet Records -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h4 class="text-lg font-bold text-slate-800">Daily Attendance Summary</h4>
+                            <p id="selectedDateTitle" class="text-xs text-slate-500">Showing logs for selected day</p>
+                        </div>
+                        <div>
+                            <span id="approvalStatusDisplay" class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                Draft (Awaiting Review)
+                            </span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-100">
+                            <thead>
+                                <tr class="text-left text-xs font-semibold text-slate-400 tracking-wider">
+                                    <th class="pb-3 pr-4">Labour Name</th>
+                                    <th class="pb-3 px-4">Shift</th>
+                                    <th class="pb-3 px-4">IN Time</th>
+                                    <th class="pb-3 px-4">OUT Time</th>
+                                    <th class="pb-3 px-4 text-right">Regular Hrs</th>
+                                    <th class="pb-3 px-4 text-right">Overtime Hrs</th>
+                                    <th class="pb-3 px-4 text-right">Wage</th>
+                                    <th class="pb-3 pl-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminAttendanceList" class="divide-y divide-slate-100">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-t border-slate-100 pt-6">
+                        <div>
+                            <p class="text-sm text-slate-500">Total Calculated Daily Payout:</p>
+                            <h4 id="adminTotalPayout" class="text-2xl font-black text-indigo-700">₹0.00</h4>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2.5" id="adminAttendanceActionButtons">
+                            <button type="button" onclick="clearAllAttendanceLogs(false)" 
+                                class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold py-2.5 px-3.5 rounded-xl text-xs sm:text-sm transition-all border border-rose-200 flex items-center space-x-1.5 shadow-sm cursor-pointer" title="Delete all trial attendance logs across all dates">
+                                <i class="fas fa-trash-alt text-rose-500"></i>
+                                <span>Clear All Logs</span>
+                            </button>
+                            <button type="button" onclick="clearAllAttendanceLogs(true)" 
+                                class="bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold py-2.5 px-3.5 rounded-xl text-xs sm:text-sm transition-all border border-amber-200 flex items-center space-x-1.5 shadow-sm cursor-pointer" title="Delete attendance records for this selected date only">
+                                <i class="fas fa-calendar-times text-amber-600"></i>
+                                <span>Delete This Day</span>
+                            </button>
+                            <button id="saveAdminCorrectionsBtn" type="button" onclick="saveAdminAttendanceCorrections()" 
+                                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all shadow-md shadow-indigo-100 flex items-center space-x-2 cursor-pointer" title="Save edited IN/OUT punch times and recalculated wages directly">
+                                <i class="fas fa-save"></i>
+                                <span>Save Corrections</span>
+                            </button>
+                            <button id="unlockDailyBtn" type="button" onclick="unlockDailySheet()" 
+                                class="hidden bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all shadow-md shadow-amber-100 flex items-center space-x-2 cursor-pointer" title="Unlock sheet back to Draft so changes can be made">
+                                <i class="fas fa-unlock"></i>
+                                <span>Unlock Sheet</span>
+                            </button>
+                            <button id="approveDailyBtn" type="button"
+                                class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-5 rounded-xl transition-all shadow-md shadow-green-100 flex items-center space-x-2 cursor-pointer">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Approve & Lock Sheet</span>
+                            </button>
+                            <button type="button" onclick="triggerWeeklyReport()" 
+                                class="bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-2.5 px-3.5 rounded-xl text-xs sm:text-sm transition-all border border-slate-200 flex items-center space-x-2 shadow-sm cursor-pointer">
+                                <i class="fab fa-telegram-plane text-indigo-600 text-sm"></i>
+                                <span>Send Telegram</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Manage Labours -->
+            <div id="adminTab-laborers" class="admin-tab-content hidden space-y-6">
+                <!-- Add New Labour Form -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h4 class="text-lg font-bold mb-4">Add New Labour</h4>
+                    <form id="addLaborForm" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Full Name</label>
+                            <input type="text" id="laborName" required class="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Shift</label>
+                            <select id="laborShift" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="Day">Day Shift</option>
+                                <option value="Night">Night Shift</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Pay Type</label>
+                            <select id="laborPayType" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="Daily">Daily Rate (Standard)</option>
+                                <option value="Hourly">Hourly Rate (Vicky/Rohan)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Rate (₹)</label>
+                            <input type="number" id="laborWage" required min="0" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center space-x-1.5 text-sm shadow-md shadow-indigo-100 hover:shadow-none">
+                                <i class="fas fa-user-plus text-xs"></i>
+                                <span>Register Labour</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Labour List Table -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h4 class="text-lg font-bold mb-4 font-sans">Registered Labours</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-100">
+                            <thead>
+                                <tr class="text-left text-xs font-semibold text-slate-400 tracking-wider">
+                                    <th class="pb-3 pr-4">Labour ID</th>
+                                    <th class="pb-3 px-4">Name</th>
+                                    <th class="pb-3 px-4">Shift</th>
+                                    <th class="pb-3 px-4">Pay Type</th>
+                                    <th class="pb-3 px-4 text-right">Rate (₹)</th>
+                                    <th class="pb-3 px-4 text-center">Status</th>
+                                    <th class="pb-3 pl-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminLaborersList" class="divide-y divide-slate-100">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Users & Passwords -->
+            <div id="adminTab-users" class="admin-tab-content hidden space-y-6">
+                <!-- Manage Passwords Dashboard -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h4 class="text-lg font-bold mb-2">Reset User Credentials</h4>
+                    <p class="text-xs text-slate-500 mb-6">Select a user to update their login credentials and password.</p>
+                    
+                    <form id="resetPasswordForm" class="max-w-md space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Select Account</label>
+                            <select id="resetAccountSelect" class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <!-- Populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">New Password</label>
+                            <input type="password" id="resetPassword" required minlength="4" class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Minimum 4 characters">
+                        </div>
+                        <button type="submit" class="bg-indigo-700 hover:bg-indigo-800 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md shadow-indigo-100 hover:shadow-none flex items-center space-x-1.5">
+                            <i class="fas fa-key"></i>
+                            <span>Update Password</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tab 4: Settings -->
+            <div id="adminTab-settings" class="admin-tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h4 class="text-lg font-bold mb-2">Application Configurations</h4>
+                    <p class="text-xs text-slate-500 mb-6">Configure business calculations, integrations, and reports.</p>
+
+                    <form id="settingsForm" class="space-y-6 max-w-xl">
+                        <!-- Hours and Rates Configuration -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Standard Daily Work Hours Limit</label>
+                                <input type="number" id="settingsWorkHours" required min="1" max="24" class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 8">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Overtime Rate Multiplier</label>
+                                <input type="number" id="settingsOvertimeRate" step="0.1" required min="1" class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 1.5">
+                            </div>
+                        </div>
+
+                        <!-- Telegram Configurations -->
+                        <div class="border-t border-slate-100 pt-6 space-y-4">
+                            <h5 class="text-sm font-bold text-slate-700">Telegram Bot Notifications</h5>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Telegram Bot Token</label>
+                                <input type="text" id="settingsTelegramToken" class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="123456789:ABCdefGhIJKlmNoPQRsT">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Telegram Chat ID (Admin's ID)</label>
+                                <input type="text" id="settingsTelegramChatId" class="w-full rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="-100123456789 or 987654321">
+                            </div>
+                        </div>
+
+                        <!-- Manual Friday Action & Cleanup -->
+                        <div class="border-t border-slate-100 pt-6 space-y-4">
+                            <h5 class="text-sm font-bold text-slate-700">Export & Backup Administration</h5>
+                            <p class="text-xs text-slate-400">Force trigger the weekly run or clean up testing trial files from Google Drive.</p>
+                            <div class="flex flex-wrap gap-3">
+                                <button type="button" id="triggerWeeklyReportBtn" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition-all shadow-md shadow-amber-100 flex items-center space-x-1.5">
+                                    <i class="fas fa-file-export"></i>
+                                    <span>Trigger Weekly Run Now</span>
+                                </button>
+                                <button type="button" id="deleteTrialSheetsBtn" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-semibold py-2.5 px-4 rounded-xl text-sm transition-all flex items-center space-x-1.5">
+                                    <i class="fas fa-trash-alt text-rose-500"></i>
+                                    <span>Delete Trial Weekly Sheets</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-100 pt-6 flex justify-end">
+                            <button type="submit" class="bg-indigo-700 hover:bg-indigo-800 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md shadow-indigo-100 hover:shadow-none flex items-center space-x-1.5">
+                                <i class="fas fa-check"></i>
+                                <span>Save Configurations</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-100 text-slate-400 text-xs py-4 text-center border-t border-slate-200 mt-auto">
+        <p>&copy; 2026 Shree Packers. All rights reserved.</p>
+    </footer>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="hidden fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center space-x-2 text-sm z-50 transition-all duration-300 transform translate-y-10 opacity-0">
+        <i id="toastIcon" class="fas fa-info-circle text-indigo-400"></i>
+        <span id="toastMsg">Notification message goes here</span>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-slate-950/40 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center space-y-3 max-w-xs w-full text-center">
+            <div class="animate-spin text-indigo-700 text-3xl">
+                <i class="fas fa-circle-notch"></i>
+            </div>
+            <p class="text-sm font-semibold text-slate-700">Connecting to Google Cloud...</p>
+        </div>
+    </div>
+
+    <!-- Script loading -->
+    <script src="app.js?v=5"></script>
+</body>
+</html>

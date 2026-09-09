@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="screen-orientation" content="portrait">
+    <meta name="x5-orientation" content="portrait">
     <title>Shree Packers - Attendance Portal</title>
     <!-- PWA Manifest & App Icons -->
     <link rel="manifest" href="manifest.json">
@@ -14,10 +16,26 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Shree Packers">
     <meta name="theme-color" content="#1e1b4b">
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Inline Critical Layout CSS to prevent horizontal shift on initial launch -->
     <style>
+        html, body {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden !important;
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+            -webkit-text-size-adjust: 100%;
+            box-sizing: border-box;
+        }
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
+        main {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
         /* Custom scrollbar styling */
         ::-webkit-scrollbar {
             width: 6px;
@@ -34,6 +52,9 @@
             background: #94a3b8;
         }
     </style>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
 
@@ -558,6 +579,11 @@
                     .then(reg => console.log('Shree Packers PWA Service Worker registered:', reg.scope))
                     .catch(err => console.warn('Service Worker registration failed:', err));
             });
+        }
+
+        // Enforce portrait orientation immediately on launch
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('portrait').catch(() => {});
         }
 
         let deferredPrompt;

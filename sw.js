@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shree-packers-v2';
+const CACHE_NAME = 'shree-packers-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

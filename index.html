@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Shree Packers - Attendance Portal</title>
-    <!-- Mobile App (PWA) Tags -->
+    <!-- PWA Manifest & App Icons -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -34,16 +38,25 @@
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
 
     <!-- Header -->
-    <header class="bg-indigo-700 text-white shadow-md py-4 px-6 flex justify-between items-center">
+    <header class="bg-indigo-700 text-white shadow-md py-3.5 px-6 flex justify-between items-center">
         <div class="flex items-center space-x-3">
-            <i class="fas fa-box-open text-2xl"></i>
-            <h1 class="text-xl font-bold tracking-wide">SHREE PACKERS</h1>
+            <img src="favicon.png" alt="Shree Packers" class="w-9 h-9 rounded-xl shadow-sm border border-indigo-400/40" />
+            <div>
+                <h1 class="text-lg sm:text-xl font-black tracking-wider leading-tight">SHREE PACKERS</h1>
+                <p class="text-[10px] text-indigo-200 font-medium tracking-wide uppercase">Attendance Portal</p>
+            </div>
         </div>
-        <div id="userInfo" class="hidden flex items-center space-x-4">
-            <span id="userRoleBadge" class="bg-indigo-600 text-xs px-2.5 py-1 rounded-full font-semibold border border-indigo-400">Manager</span>
-            <button id="logoutBtn" class="text-white hover:text-indigo-200 focus:outline-none transition-colors">
-                <i class="fas fa-sign-out-alt text-lg"></i>
+        <div class="flex items-center space-x-2.5">
+            <button id="pwaInstallBtn" type="button" class="hidden bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold px-3 py-1.5 rounded-xl shadow-sm transition-all flex items-center space-x-1.5 cursor-pointer" title="Install Shree Packers on your phone or desktop">
+                <i class="fas fa-download text-xs"></i>
+                <span>Install App</span>
             </button>
+            <div id="userInfo" class="hidden flex items-center space-x-3">
+                <span id="userRoleBadge" class="bg-indigo-600 text-xs px-2.5 py-1 rounded-full font-semibold border border-indigo-400">Manager</span>
+                <button id="logoutBtn" class="text-white hover:text-indigo-200 focus:outline-none transition-colors">
+                    <i class="fas fa-sign-out-alt text-lg"></i>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -51,13 +64,11 @@
     <main class="flex-grow p-4 md:p-6 max-w-4xl mx-auto w-full">
 
         <!-- 1. LOGIN SCREEN -->
-        <section id="loginSection" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 max-w-md mx-auto my-12">
+        <section id="loginSection" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 max-w-md mx-auto my-10">
             <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-indigo-100 text-indigo-700 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-user-shield text-2xl"></i>
-                </div>
-                <h2 class="text-2xl font-bold">Shree Packers Login</h2>
-                <p class="text-slate-500 text-sm mt-1">Please enter your credentials to proceed</p>
+                <img src="icon-192.png" alt="Shree Packers Logo" class="w-20 h-20 rounded-2xl mx-auto mb-3 shadow-md border border-indigo-100 object-cover" />
+                <h2 class="text-2xl font-black text-slate-800">Shree Packers</h2>
+                <p class="text-slate-500 text-xs mt-1 font-medium">Daily Labour Attendance & Weekly Wages</p>
             </div>
             
             <form id="loginForm" class="space-y-4" autocomplete="off" onsubmit="handleLogin(event); return false;">
@@ -540,5 +551,40 @@
 
     <!-- Script loading -->
     <script src="app.js?v=5"></script>
+    <!-- PWA Service Worker & Install Prompt Handler -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Shree Packers PWA Service Worker registered:', reg.scope))
+                    .catch(err => console.warn('Service Worker registration failed:', err));
+            });
+        }
+
+        let deferredPrompt;
+        const installBtn = document.getElementById('pwaInstallBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (installBtn) {
+                installBtn.classList.remove('hidden');
+                installBtn.addEventListener('click', async () => {
+                    installBtn.classList.add('hidden');
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log('PWA install choice:', outcome);
+                        deferredPrompt = null;
+                    }
+                });
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            if (installBtn) installBtn.classList.add('hidden');
+            console.log('Shree Packers PWA installed successfully');
+        });
+    </script>
 </body>
 </html>
